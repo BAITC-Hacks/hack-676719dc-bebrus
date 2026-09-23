@@ -8,6 +8,7 @@
   <link rel="icon" id="site-favicon" href="assets/silvius-logo-light.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/styles.css">
   <script src="js/site.js" defer></script>
+  <script src="js/auth.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Перейти к содержимому</a>
@@ -27,11 +28,20 @@
   <main class="auth-layout" id="main">
     <div class="auth-card">
       <h1 data-auth-title>Вход в Silvius</h1>
-      <p data-auth-description>Вернитесь к своим сравнениям и сохранённым заключениям.</p>
+      <p data-auth-description>Войдите, чтобы открыть рабочее пространство.</p>
       <nav class="auth-tabs" aria-label="Вход или регистрация"><a href="#login" data-auth-tab="login" aria-current="page">Вход</a><a href="#register" data-auth-tab="register">Регистрация</a></nav>
-      <form aria-describedby="auth-notice"><label class="field-label" for="email">Электронная почта</label><input class="text-input" id="email" type="email" autocomplete="email" placeholder="name@example.com" disabled><label class="field-label" for="password">Пароль</label><input class="text-input" id="password" type="password" autocomplete="current-password" placeholder="Введите пароль" disabled><button class="button button-primary" type="submit" disabled data-auth-submit>Войти</button></form>
-      <div class="info-panel" id="auth-notice" role="note"><span class="info-icon" aria-hidden="true">ⓘ</span><div><strong>Авторизация будет подключена позже</strong><p>Форма пока не принимает данные. Серверная регистрация и вход входят в следующий этап разработки.</p></div></div>
-      <a class="auth-back" href="workspace.html">Посмотреть прототип рабочего пространства ↗</a>
+      <form data-auth-form aria-describedby="auth-message">
+        <div data-register-fields hidden><label class="field-label" for="name">Имя</label><input class="text-input" id="name" name="name" type="text" autocomplete="name" minlength="2" maxlength="80" placeholder="Как к вам обращаться"></div>
+        <label class="field-label" for="email">Электронная почта</label><input class="text-input" id="email" name="email" type="email" autocomplete="email" placeholder="name@example.com" required>
+        <label class="field-label" for="password">Пароль</label><div class="password-field"><input class="text-input" id="password" name="password" type="password" autocomplete="current-password" placeholder="Введите пароль" required><button type="button" data-password-toggle aria-label="Показать пароль">Показать</button></div>
+        <p class="password-hint" data-password-hint hidden>Не менее 10 символов.</p>
+        <div class="auth-message" id="auth-message" role="alert" aria-live="polite" hidden></div>
+        <button class="button button-primary" type="submit" data-auth-submit>Войти</button>
+      </form>
+      <div class="auth-divider"><span>или</span></div>
+      <button class="button auth-google" type="button" data-google-button disabled>Продолжить с Google</button>
+      <p class="google-note" data-google-note>Google sign-in is not configured for this installation. Use email and password.</p>
+      <a class="auth-back" href="index.html">Вернуться на главную ↗</a>
     </div>
   </main>
 </body>

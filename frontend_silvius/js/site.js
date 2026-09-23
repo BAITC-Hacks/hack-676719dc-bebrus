@@ -72,7 +72,6 @@
   mainNav?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
   document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMenu(); });
 
-  // Hook for the future server session. No account is fabricated in this static prototype.
   const guestActions = document.querySelector('[data-guest-actions]');
   const userMenu = document.querySelector('[data-user-menu]');
   const userMenuButton = document.querySelector('[data-user-menu-button]');
@@ -108,6 +107,39 @@
     window.dispatchEvent(new CustomEvent('silvius:logout-request'));
   });
 
+  let csrfToken;
+  async function loadUser() {
+    try {
+      const response = await fetch('/api/auth/me', { credentials: 'same-origin' });
+      if (!response.ok) {
+        window.SilviusHeader.clearUser();
+        if (response.status === 401 && location.pathname === '/workspace.html') location.replace('/auth.html#login');
+        return;
+      }
+      const data = await response.json();
+      csrfToken = data.csrfToken;
+      window.SilviusHeader.setUser(data.user);
+    } catch (_) { window.SilviusHeader.clearUser(); }
+  }
+  loadUser();
+  window.addEventListener('silvius:logout-request', async () => {
+    try {
+      if (!csrfToken) {
+        const response = await fetch('/api/auth/csrf');
+        csrfToken = (await response.json()).csrfToken;
+      }
+      const response = await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin', headers: { 'x-csrf-token': csrfToken } });
+      if (response.status === 401) {
+        window.SilviusHeader.clearUser();
+        location.assign('/auth.html#login');
+        return;
+      }
+      if (!response.ok) throw new Error('Не удалось выйти из аккаунта.');
+      window.SilviusHeader.clearUser();
+      location.assign('/index.html');
+    } catch (_) { alert('Не удалось выйти. Обновите страницу и повторите попытку.'); }
+  });
+
   const authTabs = document.querySelectorAll('[data-auth-tab]');
   if (authTabs.length) {
     const updateAuthView = () => {
@@ -121,11 +153,20 @@
       const submit = document.querySelector('[data-auth-submit]');
       if (title) title.textContent = mode === 'register' ? 'Создать аккаунт Silvius' : 'Вход в Silvius';
       if (description) description.textContent = mode === 'register'
-        ? 'Сохраните сравнения и возвращайтесь к заключениям в любое время.'
-        : 'Вернитесь к своим сравнениям и сохранённым заключениям.';
+        ? 'Создайте аккаунт, чтобы открыть рабочее пространство.'
+        : 'Войдите, чтобы открыть рабочее пространство.';
       if (submit) submit.textContent = mode === 'register' ? 'Зарегистрироваться' : 'Войти';
       const password = document.getElementById('password');
       if (password) password.autocomplete = mode === 'register' ? 'new-password' : 'current-password';
+      const registerFields = document.querySelector('[data-register-fields]');
+      if (registerFields) registerFields.hidden = mode !== 'register';
+      const name = document.getElementById('name');
+      if (name) name.required = mode === 'register';
+      if (password) password.minLength = mode === 'register' ? 10 : 1;
+      const hint = document.querySelector('[data-password-hint]');
+      if (hint) hint.hidden = mode !== 'register';
+      const message = document.getElementById('auth-message');
+      if (message) { message.hidden = true; message.textContent = ''; }
     };
     window.addEventListener('hashchange', updateAuthView);
     updateAuthView();
