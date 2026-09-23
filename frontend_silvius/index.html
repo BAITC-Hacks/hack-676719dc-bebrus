@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Silvius помогает сопоставлять документы до и после реорганизации и просматривать выводы вместе с источниками.">
+  <title>Silvius — анализ организационных изменений</title>
+  <link rel="icon" id="site-favicon" href="assets/silvius-logo-light.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/site.js" defer></script>
+  <script src="js/landing.js" defer></script>
+</head>
+<body class="page-home">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <div class="utility-bar">
+      <div class="container utility-inner">
+        <span class="utility-caption">Прототип для HackAlem</span>
+        <div class="utility-actions">
+          <button class="theme-toggle" type="button" data-theme-toggle aria-label="Включить тёмную тему" title="Сменить тему">
+            <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.2 15.9A8.6 8.6 0 0 1 8.1 3.8 8.6 8.6 0 1 0 20.2 15.9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+          <div class="guest-actions" data-guest-actions>
+            <a href="auth.html#login">Войти</a>
+            <a class="utility-register" href="auth.html#register">Регистрация</a>
+          </div>
+          <div class="user-menu" data-user-menu hidden>
+            <button class="user-menu-button" type="button" data-user-menu-button aria-expanded="false" aria-controls="user-menu-panel"><span data-user-name>Пользователь</span><span aria-hidden="true">⌄</span></button>
+            <div class="user-menu-panel" id="user-menu-panel" hidden><a href="workspace.html">Рабочее пространство</a><button type="button" data-logout>Выйти</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="brand-bar">
+      <div class="container brand-inner">
+        <nav class="main-nav" id="main-nav" aria-label="Основная навигация">
+          <a href="#possibilities">Возможности</a>
+          <a href="#workflow">Как это работает</a>
+        </nav>
+        <button class="menu-toggle" type="button" data-menu-toggle aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><span></span></button>
+        <a class="brand" href="index.html" aria-label="Silvius — главная">
+          <span class="brand-mark" data-brand-mark><span class="brand-mark-fallback">S</span><img alt="" data-brand-image hidden></span>
+          <span class="brand-name">Silvius</span>
+        </a>
+        <div class="partner" aria-label="Казахтелеком">
+          <span class="partner-caption">Задача HackAlem</span>
+          <img src="assets/kazakhtelecom-logo.webp" width="160" height="74" alt="Казахтелеком">
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero section-pad">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-line"></span> Анализ организационных изменений</div>
+          <h1>Когда структура меняется, <span>функции должны оставаться видимыми.</span></h1>
+          <p class="hero-lead">Silvius создаётся для сопоставления комплектов документов «до» и «после» реорганизации, чтобы помогать находить возможные пробелы, дублирование и конфликты интересов.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="workspace.html">Открыть рабочее пространство <span aria-hidden="true">↗</span></a>
+            <a class="button button-text" href="#workflow">Как устроен анализ <span aria-hidden="true">↓</span></a>
+          </div>
+          <p class="prototype-note"><span class="note-dot"></span> Сейчас доступен интерфейсный прототип. Анализ документов будет подключён отдельно.</p>
+        </div>
+        <div class="hero-visual" aria-label="Схема сопоставления документов до и после">
+          <div class="visual-orbit orbit-one"></div><div class="visual-orbit orbit-two"></div>
+          <div class="visual-topline"><span>СРАВНЕНИЕ 01</span><span class="visual-status"><i></i> Схема процесса</span></div>
+          <div class="document-pair">
+            <div class="document-card before-card"><span class="document-kind">ДО</span><div class="document-icon"><span></span><span></span><span></span></div><strong>Действующая структура</strong><small>Положения · функции</small></div>
+            <div class="pair-link" aria-hidden="true"><span>→</span></div>
+            <div class="document-card after-card"><span class="document-kind">ПОСЛЕ</span><div class="document-icon"><span></span><span></span><span></span></div><strong>Новая структура</strong><small>Положения · функции</small></div>
+          </div>
+          <div class="visual-outcome"><div class="outcome-icon" aria-hidden="true">⌕</div><div><span class="outcome-label">ИТОГ</span><strong>Заключение с опорой на документы</strong><small>Каждый вывод связан с исходным фрагментом</small></div><span class="outcome-arrow" aria-hidden="true">↗</span></div>
+          <div class="visual-footer"><span>01 / Документы</span><span>02 / Сопоставление</span><span>03 / Выводы</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="trust-strip" aria-label="Принцип работы"><div class="container trust-inner"><span>ДОКУМЕНТЫ «ДО»</span><b aria-hidden="true">+</b><span>ДОКУМЕНТЫ «ПОСЛЕ»</span><b aria-hidden="true">→</b><span>ПРОВЕРЯЕМЫЕ ВЫВОДЫ</span></div></section>
+
+    <section class="section-pad possibilities" id="possibilities">
+      <div class="container">
+        <div class="section-head reveal-on-scroll"><div><div class="eyebrow"><span class="eyebrow-line"></span> Что будет в результате</div><h2>Не просто список отличий.<br><span>Контекст для решения.</span></h2></div><p>Сервис помогает рассмотреть изменения в обязанностях подразделений. Итоговые выводы нужно проверять по первичным документам.</p></div>
+        <div class="feature-grid">
+          <article class="feature-card reveal-on-scroll"><div class="feature-number">01</div><div class="feature-symbol" aria-hidden="true">↘</div><h3>Потеря функций</h3><p>Функции из прежних документов, для которых может не найтись нового ответственного.</p><div class="feature-foot">Проверить преемственность <span aria-hidden="true">↗</span></div></article>
+          <article class="feature-card reveal-on-scroll"><div class="feature-number">02</div><div class="feature-symbol" aria-hidden="true">≋</div><h3>Дублирование</h3><p>Похожие обязанности, одновременно закреплённые за несколькими подразделениями.</p><div class="feature-foot">Уточнить границы ролей <span aria-hidden="true">↗</span></div></article>
+          <article class="feature-card reveal-on-scroll"><div class="feature-number">03</div><div class="feature-symbol" aria-hidden="true">◇</div><h3>Конфликт интересов</h3><p>Сочетания полномочий, которые могут требовать дополнительной организационной проверки.</p><div class="feature-foot">Изучить основание <span aria-hidden="true">↗</span></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="workflow section-pad" id="workflow">
+      <div class="container workflow-grid">
+        <div class="reveal-on-scroll"><div class="eyebrow"><span class="eyebrow-line"></span> Понятный маршрут</div><h2>От двух комплектов<br>к одному заключению.</h2><p>Сценарий готового сервиса: материалы каждой версии структуры, выводы и ссылки на подтверждающие фрагменты в одном месте.</p><a class="button button-outline" href="workspace.html">Посмотреть рабочее пространство <span aria-hidden="true">↗</span></a></div>
+        <ol class="steps"><li class="reveal-on-scroll"><span class="step-index">01</span><div><h3>Создайте сравнение</h3><p>Дайте ему понятное название, чтобы позже быстро найти в истории.</p></div></li><li class="reveal-on-scroll"><span class="step-index">02</span><div><h3>Разделите документы</h3><p>Добавьте комплекты «до» и «после» в отдельные области загрузки.</p></div></li><li class="reveal-on-scroll"><span class="step-index">03</span><div><h3>Изучите выводы</h3><p>Просмотрите сопоставления, возможные риски и связанные цитаты.</p></div></li><li class="reveal-on-scroll"><span class="step-index">04</span><div><h3>Вернитесь к результату</h3><p>Откройте сохранённое заключение из истории без повторной обработки.</p></div></li></ol>
+      </div>
+    </section>
+
+    <section class="closing section-pad"><div class="container closing-inner reveal-on-scroll"><div><div class="eyebrow eyebrow-light"><span class="eyebrow-line"></span> Silvius</div><h2>Изменения легче оценивать,<br>когда видно их основание.</h2><p>Начните с чистого рабочего пространства и подготовьте документы двух версий.</p></div><a class="button button-white" href="workspace.html">Перейти к сравнению <span aria-hidden="true">↗</span></a></div></section>
+  </main>
+  <footer class="site-footer"><div class="container footer-inner"><span>© Silvius · Прототип HackAlem</span><span>Анализ организационной структуры и функционала</span><a href="#main">Наверх ↑</a></div></footer>
+</body>
+</html>

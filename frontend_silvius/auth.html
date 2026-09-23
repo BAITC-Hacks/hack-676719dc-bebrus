@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Вход и регистрация в Silvius.">
+  <title>Вход и регистрация — Silvius</title>
+  <link rel="icon" id="site-favicon" href="assets/silvius-logo-light.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <div class="utility-bar"><div class="container utility-inner"><span class="utility-caption">Прототип для HackAlem</span><div class="utility-actions">
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Включить тёмную тему" title="Сменить тему"><svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.2 15.9A8.6 8.6 0 0 1 8.1 3.8 8.6 8.6 0 1 0 20.2 15.9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+      <div class="guest-actions" data-guest-actions><a href="auth.html#login">Войти</a><a class="utility-register" href="auth.html#register">Регистрация</a></div>
+      <div class="user-menu" data-user-menu hidden><button class="user-menu-button" type="button" data-user-menu-button aria-expanded="false" aria-controls="user-menu-panel"><span data-user-name>Пользователь</span><span aria-hidden="true">⌄</span></button><div class="user-menu-panel" id="user-menu-panel" hidden><a href="workspace.html">Рабочее пространство</a><button type="button" data-logout>Выйти</button></div></div>
+    </div></div></div>
+    <div class="brand-bar"><div class="container brand-inner">
+      <nav class="main-nav" id="main-nav" aria-label="Основная навигация"><a href="index.html">Главная</a><a href="index.html#workflow">Как это работает</a></nav>
+      <button class="menu-toggle" type="button" data-menu-toggle aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><span></span></button>
+      <a class="brand" href="index.html" aria-label="Silvius — главная"><span class="brand-mark" data-brand-mark><span class="brand-mark-fallback">S</span><img alt="" data-brand-image hidden></span><span class="brand-name">Silvius</span></a>
+      <div class="partner" aria-label="Казахтелеком"><span class="partner-caption">Задача HackAlem</span><img src="assets/kazakhtelecom-logo.webp" width="160" height="74" alt="Казахтелеком"></div>
+    </div></div>
+  </header>
+  <main class="auth-layout" id="main">
+    <div class="auth-card">
+      <h1 data-auth-title>Вход в Silvius</h1>
+      <p data-auth-description>Вернитесь к своим сравнениям и сохранённым заключениям.</p>
+      <nav class="auth-tabs" aria-label="Вход или регистрация"><a href="#login" data-auth-tab="login" aria-current="page">Вход</a><a href="#register" data-auth-tab="register">Регистрация</a></nav>
+      <form aria-describedby="auth-notice"><label class="field-label" for="email">Электронная почта</label><input class="text-input" id="email" type="email" autocomplete="email" placeholder="name@example.com" disabled><label class="field-label" for="password">Пароль</label><input class="text-input" id="password" type="password" autocomplete="current-password" placeholder="Введите пароль" disabled><button class="button button-primary" type="submit" disabled data-auth-submit>Войти</button></form>
+      <div class="info-panel" id="auth-notice" role="note"><span class="info-icon" aria-hidden="true">ⓘ</span><div><strong>Авторизация будет подключена позже</strong><p>Форма пока не принимает данные. Серверная регистрация и вход входят в следующий этап разработки.</p></div></div>
+      <a class="auth-back" href="workspace.html">Посмотреть прототип рабочего пространства ↗</a>
+    </div>
+  </main>
+</body>
+</html>

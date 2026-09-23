@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Рабочее пространство Silvius для сравнения документов до и после реорганизации.">
+  <title>Рабочее пространство — Silvius</title>
+  <link rel="icon" id="site-favicon" href="assets/silvius-logo-light.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/site.js" defer></script>
+  <script src="js/workspace.js" defer></script>
+</head>
+<body class="workspace-page">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <div class="utility-bar"><div class="container utility-inner"><span class="utility-caption">Рабочее пространство · прототип</span><div class="utility-actions">
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Включить тёмную тему" title="Сменить тему"><svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.2 15.9A8.6 8.6 0 0 1 8.1 3.8 8.6 8.6 0 1 0 20.2 15.9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg><svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
+      <div class="guest-actions" data-guest-actions><a href="auth.html#login">Войти</a><a class="utility-register" href="auth.html#register">Регистрация</a></div>
+      <div class="user-menu" data-user-menu hidden><button class="user-menu-button" type="button" data-user-menu-button aria-expanded="false" aria-controls="user-menu-panel"><span data-user-name>Пользователь</span><span aria-hidden="true">⌄</span></button><div class="user-menu-panel" id="user-menu-panel" hidden><a href="workspace.html">Рабочее пространство</a><button type="button" data-logout>Выйти</button></div></div>
+    </div></div></div>
+    <div class="brand-bar"><div class="container brand-inner">
+      <nav class="main-nav" id="main-nav" aria-label="Основная навигация"><a href="index.html">Главная</a><a href="index.html#possibilities">Возможности</a></nav>
+      <button class="menu-toggle" type="button" data-menu-toggle aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav"><span></span><span></span><span></span></button>
+      <a class="brand" href="index.html" aria-label="Silvius — главная"><span class="brand-mark" data-brand-mark><span class="brand-mark-fallback">S</span><img alt="" data-brand-image hidden></span><span class="brand-name">Silvius</span></a>
+      <div class="partner" aria-label="Казахтелеком"><span class="partner-caption">Задача HackAlem</span><img src="assets/kazakhtelecom-logo.webp" width="160" height="74" alt="Казахтелеком"></div>
+    </div></div>
+  </header>
+
+  <div class="workspace-shell">
+    <aside class="workspace-sidebar" aria-label="Разделы рабочего пространства">
+      <div><div class="sidebar-label">Работа с документами</div><nav class="workspace-nav" aria-label="Разделы"><button type="button" data-workspace-tab="new" aria-current="page"><span class="nav-glyph" aria-hidden="true">＋</span>Новое сравнение</button><button type="button" data-workspace-tab="history"><span class="nav-glyph" aria-hidden="true">◷</span>История</button></nav></div>
+      <div class="sidebar-help"><strong>Как начать?</strong><p>Назовите сравнение и добавьте документы по обе стороны изменения структуры.</p></div>
+    </aside>
+    <main class="workspace-main" id="main">
+      <section data-workspace-panel="new" aria-labelledby="new-title">
+        <div class="breadcrumb">Silvius / Рабочее пространство / Новое сравнение</div>
+        <div class="workspace-heading"><div><h1 id="new-title">Новое сравнение</h1><p>Подготовьте материалы до и после реорганизации.</p></div><span class="prototype-badge">ПРОТОТИП ИНТЕРФЕЙСА</span></div>
+        <div class="workspace-panel">
+          <label class="field-label" for="comparison-title">Название сравнения</label>
+          <input class="text-input" id="comparison-title" type="text" maxlength="100" placeholder="Например, реорганизация регионального блока">
+          <p class="field-help">Позже это название будет отображаться в истории анализов.</p>
+          <div class="upload-grid">
+            <section class="upload-group" aria-labelledby="before-title"><div class="upload-heading"><h2 id="before-title">Документы «до»</h2><span data-file-count="before">0 файлов</span></div><label class="upload-zone" data-upload-zone="before"><input type="file" data-file-input="before" accept=".pdf,.docx,.txt" multiple><span class="upload-symbol" aria-hidden="true">↥</span><strong>Выберите файлы или перетащите сюда</strong><small>PDF, DOCX или TXT</small></label><ul class="file-list" data-file-list="before" aria-label="Выбранные документы до"></ul></section>
+            <section class="upload-group" aria-labelledby="after-title"><div class="upload-heading"><h2 id="after-title">Документы «после»</h2><span data-file-count="after">0 файлов</span></div><label class="upload-zone" data-upload-zone="after"><input type="file" data-file-input="after" accept=".pdf,.docx,.txt" multiple><span class="upload-symbol" aria-hidden="true">↥</span><strong>Выберите файлы или перетащите сюда</strong><small>PDF, DOCX или TXT</small></label><ul class="file-list" data-file-list="after" aria-label="Выбранные документы после"></ul></section>
+          </div>
+          <div class="workspace-submit"><p>Файлы сейчас отображаются только в этой вкладке. Они не загружаются и не сохраняются.</p><button class="button button-primary" type="button" disabled title="Доступно после подключения сервера и агента">Запустить анализ <span aria-hidden="true">↗</span></button></div>
+        </div>
+        <div class="info-panel" role="note"><span class="info-icon" aria-hidden="true">ⓘ</span><div><strong>Анализ пока не подключён</strong><p>Это новый фронтенд Silvius. Серверная авторизация, хранение документов и интеграция с агентом будут добавлены следующим этапом.</p></div></div>
+      </section>
+      <section data-workspace-panel="history" aria-labelledby="history-title" hidden>
+        <div class="breadcrumb">Silvius / Рабочее пространство / История</div>
+        <div class="workspace-heading"><div><h1 id="history-title">История сравнений</h1><p>Здесь появятся сохранённые заключения.</p></div><span class="prototype-badge">ПРОТОТИП ИНТЕРФЕЙСА</span></div>
+        <div class="history-toolbar"><label class="visually-hidden" for="history-search">Поиск сравнений</label><input class="text-input" id="history-search" type="search" placeholder="Поиск по названию" disabled></div>
+        <div class="empty-state" style="margin-top:16px"><div class="empty-state-icon" aria-hidden="true">▤</div><h2>Пока нет сравнений</h2><p>Когда серверное сохранение будет подключено, здесь появятся название, дата и статус каждого анализа.</p><button class="button button-outline" type="button" data-go-new>Создать сравнение <span aria-hidden="true">↗</span></button></div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
