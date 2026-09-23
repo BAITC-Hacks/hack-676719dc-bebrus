@@ -2,13 +2,13 @@ const HARDCODED_OPENAI_API_KEY = ""; // ВСТАВИТЬ API-КЛЮЧ ЗДЕСЬ
 
 module.exports = {
   apiKey: HARDCODED_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
-  model: process.env.OPENAI_MODEL || "gpt-6-luna",
+  model: process.env.OPENAI_MODEL || "gpt-6-astra",
   serviceTier: "fast",
   extractionConcurrency: 2,
   modelByRole: {},
   effortByRole: {
-    routing: "medium", extraction: "medium", comparison: "medium",
-    crosscheck: "high", judge: "high", synthesis: "medium"
+    routing: "low", extraction: "low", comparison: "low",
+    crosscheck: "medium", judge: "medium", synthesis: "low"
   },
   limits: { filesPerSide: 10, fileBytes: 20971520, totalTextChars: 2000000 },
   budgets: {

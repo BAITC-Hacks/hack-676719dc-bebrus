@@ -18,7 +18,7 @@ export function loadConfig(overrides = {}) {
   for (const key of ['limits', 'budgets', 'effortByRole', 'modelByRole']) result[key] = { ...defaults[key], ...local[key], ...overrides[key] };
   check(['fast','default','auto'].includes(result.serviceTier), 'Допустимые serviceTier: fast, default, auto.');
   check(Number.isInteger(result.extractionConcurrency)&&result.extractionConcurrency>=1&&result.extractionConcurrency<=4, 'extractionConcurrency должно быть целым числом от 1 до 4.');
-  for (const value of Object.values(result.effortByRole)) check(['medium','high','xhigh'].includes(value), 'Допустимые effort: medium, high, xhigh.');
+  for (const value of Object.values(result.effortByRole)) check(['low','medium','high','xhigh'].includes(value), 'Допустимые effort: low, medium, high, xhigh.');
   for (const value of [...Object.values(result.limits), ...Object.entries(result.budgets).filter(([key])=>key!=='transientRetries').map(([,value])=>value)]) check(Number.isInteger(value) && value > 0, 'Лимиты и бюджеты должны быть положительными целыми числами.');
   check(Number.isInteger(result.budgets.transientRetries)&&result.budgets.transientRetries>=0,'Число технических повторов должно быть целым неотрицательным.');
   result.dataDir = overrides.dataDir || process.env.HECTRA_DATA_DIR || path.join(ROOT, 'data');
