@@ -1,0 +1,9 @@
+node_modules/
+.npm-cache/
+data/
+server-config.local.cjs
+.env
+.env.*
+test-results/
+playwright-report/
+*.tmp
