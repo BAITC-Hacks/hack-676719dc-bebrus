@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Анализ документов — Silvius</title>
+  <link rel="icon" id="site-favicon" href="assets/silvius-logo-light.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/run.css">
+  <script src="js/site.js" defer></script>
+  <script type="module" src="js/run.js"></script>
+</head>
+<body class="workspace-page">
+  <a class="skip-link" href="#main">Перейти к содержимому</a>
+  <header class="site-header">
+    <div class="utility-bar"><div class="container utility-inner"><span class="utility-caption">Рабочее пространство · анализ документов</span><div class="utility-actions"><button class="theme-toggle" type="button" data-theme-toggle aria-label="Сменить тему" title="Сменить тему">◐</button><div class="user-menu" data-user-menu hidden><button class="user-menu-button" type="button" data-user-menu-button aria-expanded="false" aria-controls="user-menu-panel"><span data-user-name>Пользователь</span><span aria-hidden="true">⌄</span></button><div class="user-menu-panel" id="user-menu-panel" hidden><a href="workspace.html">Рабочее пространство</a><button type="button" data-logout>Выйти</button></div></div></div></div></div>
+    <div class="brand-bar"><div class="container brand-inner"><nav class="main-nav" aria-label="Основная навигация"><a href="workspace.html">← Все сравнения</a></nav><a class="brand" href="index.html" aria-label="Silvius — главная"><span class="brand-mark" data-brand-mark><span class="brand-mark-fallback">S</span><img alt="" data-brand-image hidden></span><span class="brand-name">Silvius</span></a><div class="partner" aria-label="Казахтелеком"><span class="partner-caption">Задача HackAlem</span><img src="assets/kazakhtelecom-logo.webp" width="160" height="74" alt="Казахтелеком"></div></div></div>
+  </header>
+  <main class="run-main container" id="main">
+    <div class="breadcrumb"><a href="workspace.html#history">Silvius / История сравнений</a> / Анализ</div>
+    <div class="workspace-heading"><div><h1 id="run-title">Загрузка анализа…</h1><p id="run-subtitle"></p></div><span class="run-state" id="run-state"></span></div>
+    <p id="run-error" class="run-error" role="alert" hidden></p>
+    <p id="run-test-notice" class="run-notice" hidden>Тестовый прогон: ответы синтетические и не подтверждают качество анализа документов.</p>
+    <section class="workspace-panel run-overview" aria-labelledby="progress-title"><div class="run-section-heading"><h2 id="progress-title">Ход анализа</h2><div class="run-actions"><button class="button button-primary" id="run-start" type="button" hidden>Продолжить анализ</button><button class="button button-outline" id="run-cancel" type="button" hidden>Остановить</button><button class="button button-outline" id="run-synthesize" type="button" hidden>Обновить заключение</button><a class="button button-outline" id="run-export" hidden>Скачать HTML-отчёт</a></div></div><p id="run-progress"></p><div class="run-progress-track" id="run-progress-track" role="progressbar" aria-label="Ход анализа" aria-valuemin="0" aria-valuemax="100"><div class="run-progress-fill" id="run-progress-fill"></div><div class="run-progress-activity" aria-hidden="true"></div></div><div id="run-clarification" hidden></div></section>
+    <nav class="run-tabs" aria-label="Разделы анализа"><button type="button" data-run-tab="summary" aria-current="page">Заключение</button><button type="button" data-run-tab="findings">Находки</button><button type="button" data-run-tab="map">Подразделения</button><button type="button" data-run-tab="functions">Функции</button><button type="button" data-run-tab="documents">Документы</button><button type="button" data-run-tab="diff">Текстовый diff</button><button type="button" data-run-tab="coverage">Полнота</button></nav>
+    <section class="workspace-panel run-content" id="run-content" aria-live="polite"></section>
+  </main>
+  <dialog id="source-dialog" class="run-dialog"><div id="source-content"></div><form method="dialog"><button class="button button-outline">Закрыть</button></form></dialog>
+</body>
+</html>

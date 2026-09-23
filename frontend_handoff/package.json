@@ -1,0 +1,9 @@
+{
+  "name": "hectra-frontend-handoff",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Frontend source and regression tests for the Hectra for editors redesign handoff",
+  "scripts": {
+    "test": "node --test"
+  }
+}

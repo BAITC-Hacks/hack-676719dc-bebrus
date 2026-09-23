@@ -12,6 +12,8 @@ let service;
 try { service = createApp(); }
 catch (error) { console.error(`Не удалось запустить Silvius: ${error.message}`); process.exit(1); }
 
+try { await service.initializePipeline(); }
+catch (error) { console.error(`Не удалось загрузить пайплайн: ${error.message}`); service.close(); process.exit(1); }
 const server = service.app.listen(port, host, () => {
   console.log(`Silvius доступен: http://${host}:${port}`);
 });
@@ -21,6 +23,15 @@ server.on('error', error => {
   service.close();
   process.exitCode = 1;
 });
-for (const signal of ['SIGINT', 'SIGTERM']) {
-  process.on(signal, () => server.close(() => { service.close(); process.exit(0); }));
-}
+let stopping = false;
+for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, async () => {
+  if (stopping) return;
+  stopping = true;
+  try {
+    await service.stopPipeline();
+    server.close(() => { service.close(); process.exit(0); });
+  } catch (error) {
+    console.error(`Не удалось сохранить анализ при остановке: ${error.message}`);
+    server.close(() => { service.close(); process.exit(1); });
+  }
+});

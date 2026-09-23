@@ -8,6 +8,8 @@ import { join, resolve } from 'node:path';
 import { openDatabase } from './database.js';
 import { SqliteSessionStore } from './session-store.js';
 import { hashPassword, verifyPassword } from './password.js';
+import { createApplication } from '../pipeline/server/index.js';
+import { loadConfig } from '../pipeline/server/config.js';
 
 const root = resolve(import.meta.dirname, '..');
 const frontend = join(root, 'frontend_silvius');
@@ -79,7 +81,7 @@ export function createApp({ dbPath = join(root, 'data', 'silvius.sqlite'), env =
 
   app.disable('x-powered-by');
   if (production) app.set('trust proxy', 1);
-  app.use(express.json({ limit: '16kb' }));
+  app.use(express.json({ limit: '4mb' }));
   app.use(session({
     name: 'silvius.sid', secret, store, resave: false, saveUninitialized: false, rolling: true,
     cookie: { httpOnly: true, sameSite: 'lax', secure: production, maxAge }
@@ -107,6 +109,20 @@ export function createApp({ dbPath = join(root, 'data', 'silvius.sqlite'), env =
     next();
   };
   const newCsrf = req => (req.session.csrfToken = randomBytes(32).toString('base64url'));
+  const pipelineConfig = loadConfig({
+    dataDir: env.HECTRA_DATA_DIR || join(resolve(dbPath, '..'), 'pipeline'),
+    ...(env.OPENAI_MODEL ? { model: env.OPENAI_MODEL } : {}),
+    testMode: env.HECTRA_TEST_MODE === '1'
+  });
+  let pipelineReady;
+  const getPipeline = () => pipelineReady ||= createApplication({ config: pipelineConfig, requireOwner: true });
+  async function stopPipeline() {
+    if (!pipelineReady) return;
+    const { store: pipelineStore, orchestrator } = await pipelineReady;
+    for (const runId of orchestrator.active.keys()) await orchestrator.cancel(pipelineStore.get(runId));
+    await Promise.all([...orchestrator.active.values()].map(entry => entry.promise));
+    await Promise.all([...pipelineStore.queues.values()]);
+  }
 
   app.get('/api/auth/config', (_req, res) => res.json({ googleEnabled }));
   app.get('/api/auth/csrf', (req, res) => res.json({ csrfToken: req.session.csrfToken || newCsrf(req) }));
@@ -235,6 +251,20 @@ export function createApp({ dbPath = join(root, 'data', 'silvius.sqlite'), env =
     res.set('Cache-Control', 'no-store');
     res.sendFile(join(frontend, 'workspace.html'));
   });
+  app.get('/run.html', requireAuth, (_req, res) => {
+    res.set('Cache-Control', 'no-store');
+    res.sendFile(join(frontend, 'run.html'));
+  });
+  app.use('/api/hectra', requireAuth, (req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return csrf(req, res, next);
+    next();
+  }, async (req, res, next) => {
+    try {
+      const { app: pipelineApp } = await getPipeline();
+      req.url = `/api${req.url}`;
+      pipelineApp(req, res, next);
+    } catch (error) { next(error); }
+  });
   app.get('/', (_req, res) => res.sendFile(join(frontend, 'index.html')));
   app.use(express.static(frontend, { index: false }));
   app.use('/api', (_req, res) => errorResponse(res, 404, 'NOT_FOUND', 'Маршрут не найден.'));
@@ -244,5 +274,5 @@ export function createApp({ dbPath = join(root, 'data', 'silvius.sqlite'), env =
     errorResponse(res, 500, 'SERVER_ERROR', 'Внутренняя ошибка сервера.');
   });
 
-  return { app, db, store, close() { clearInterval(cleanupTimer); db.close(); } };
+  return { app, db, store, initializePipeline: getPipeline, stopPipeline, close() { clearInterval(cleanupTimer); db.close(); } };
 }

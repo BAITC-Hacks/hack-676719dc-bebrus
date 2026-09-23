@@ -66,7 +66,10 @@ Copy-Item server-config.example.cjs server-config.local.cjs
 | API-ключ | `OPENAI_API_KEY` или `HARDCODED_OPENAI_API_KEY` в `server-config.local.cjs` | Используется только сервером |
 | Общая модель | `OPENAI_MODEL` или поле `model` локального конфига | По умолчанию `gpt-6-luna` |
 | Модель отдельной роли | `modelByRole` в локальном конфиге | Необязательное явное переопределение |
-| Reasoning | `effortByRole` в локальном конфиге | `high`: routing, extraction, comparison, synthesis; `xhigh`: crosscheck, judge |
+| Reasoning | `effortByRole` в локальном конфиге | `medium`: routing, extraction, comparison, synthesis; `high`: crosscheck, judge |
+| Fast mode | `serviceTier` в локальном конфиге | По умолчанию `fast` для всех live-запросов Responses API; фактический tier записывается в журнал ответа |
+| Параллельное извлечение | `extractionConcurrency` в локальном конфиге | По умолчанию 2 независимых фрагмента одновременно, результаты фиксируются в порядке документов |
+| Лимит ответа извлечения | `budgets.extractionOutputTokens` в локальном конфиге | По умолчанию 32 000; при обрыве ответа по лимиту выполняется один повтор с увеличенным пределом |
 | Порт | `PORT` | По умолчанию `3000` |
 | Каталог данных | `HECTRA_DATA_DIR` | По умолчанию `data/` в корне; на сервере задать абсолютный путь к постоянному диску |
 | Тестовый provider | `HECTRA_TEST_MODE=1` | Только для разработки/стенда и запусков с `mode: "test"` |
@@ -477,7 +480,7 @@ DELETE документа убирает его из состава запуск
 
 Сохранить `server/`, `shared/`, `public/`, `prompts/system/`, конфиги/lockfile и зависимости. `server/diff.js` использует `change_rendering_handoff/js/actionLog.js` во время работы — этот ресурс обязателен. Для исходных регрессионных тестов нужен весь `change_rendering_handoff/`. `test-support/` требуется для тестового provider. Контрольные документы не назначаются пользовательским пулам автоматически.
 
-На сервере требуется исходящий HTTPS к OpenAI. Ошибки доступа к модели и неподдерживаемых параметров показываются явно; автоматической подмены `gpt-6-luna` или `xhigh` другой конфигурацией нет.
+На сервере требуется исходящий HTTPS к OpenAI. Ошибки доступа к модели и неподдерживаемых параметров показываются явно; автоматической подмены `gpt-6-luna` или настроенного уровня reasoning другой конфигурацией нет.
 
 ## 10. Проверка интеграции
 

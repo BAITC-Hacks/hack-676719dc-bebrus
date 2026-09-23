@@ -347,3 +347,7 @@ html[data-theme="dark"] .auth-message { background: #44272e; color: #ffd8d8; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
   .motion-ready .reveal-on-scroll { opacity: 1; transform: none; }
 }
+/* Saved comparisons in the Silvius workspace. */
+.history-item { display: flex; flex-direction: column; gap: 7px; margin-top: 12px; padding: 17px; border: 1px solid #d6e4ec; border-radius: 9px; color: inherit; background: var(--surface-soft); text-decoration: none; }
+.history-item:hover { border-color: #4b9fc7; }
+.history-item span { color: var(--muted); font-size: 13px; }

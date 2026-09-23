@@ -21,6 +21,12 @@ export class Orchestrator {
     if(run.state==='needs_clarification'&&!synthesisOnly)return run;
     const ready=await this.preflight(run);
     if(ready.state!=='ready'){run.state=ready.state;await this.store.save(run);return run;}
+    if(run.mode==='live') {
+      const previous={effortByRole:run.settings.effortByRole,serviceTier:run.settings.serviceTier};
+      run.settings.effortByRole={...this.config.effortByRole};
+      run.settings.serviceTier=this.config.serviceTier;
+      if(JSON.stringify(previous)!==JSON.stringify({effortByRole:run.settings.effortByRole,serviceTier:run.settings.serviceTier}))this.store.log(run,{type:'settings_updated',effortByRole:run.settings.effortByRole,serviceTier:run.settings.serviceTier});
+    }
     if(!run.prompt_snapshot){run.prompt_snapshot=await loadPrompts();run.prompt_hashes=run.prompt_snapshot.hashes;}
     run.epoch++;run.state='running';run.last_error=null;
     const epoch=run.epoch,controller=new AbortController();
@@ -51,7 +57,8 @@ export class Orchestrator {
         for(const c of result.coverage){check(c.status==='considered'||c.reason.trim(),'У пропущенного участка должно быть основание.');for(const b of rangeBlocks(run,c.range))check(assigned.has(refKey(blockRef(b))),'Покрытие извлечения вне назначенных блоков.');}
       }
     };
-    return this.client.call(run,role,data,{signal,guard:this.guard(run,epoch,task),validateOutput});
+    const requestData=role==='judge'&&task?{...data,judge_scope:{allowed_checked_ranges:[...task.before,...task.after],allowed_finding_ids:task.kind==='reconcile'?task.review_finding_ids:task.result?.findings.map(f=>f.id)||[],rule:'checked_ranges указывай только внутри назначенных диапазонов. В checked_finding_refs, issues и resolutions используй только allowed_finding_ids. Соседние блоки context с assigned=false доступны для понимания, но не входят в область подтверждённой проверки.'}}:data;
+    return this.client.call(run,role,requestData,{signal,guard:this.guard(run,epoch,task),validateOutput});
   }
   catalogue(run){return run.documents.map(d=>({id:d.id,name:d.name,side:d.side,status:d.status,extraction_version:d.extraction_version,warnings:d.warnings,block_count:d.blocks.length}));}
   context(run,ranges) {
@@ -79,23 +86,35 @@ export class Orchestrator {
   }
   extractionJobs(run) {return run.documents.flatMap(d=>splitBlocks(d.blocks.filter(b=>b.text.trim()&&!b.unavailable),run.settings.budgets).map(blocks=>({doc:d,blocks,ranges:rangesFromBlocks(blocks)})));}
   async extractJobs(run,jobs,epoch,signal) {
+    const pending=[];
     for(const job of jobs) {
-      const dependency=hash({document_id:job.doc.id,document:job.doc.file_hash,version:job.doc.extraction_version,blocks:job.blocks.map(b=>({id:b.id,text:b.text,context:contextBlocks(job.doc,b)})),prompts:run.prompt_hashes,model:run.settings.modelByRole.extraction||run.settings.model,effort:run.settings.effortByRole.extraction,clarifications:run.clarifications});
-      if(run.extractions.some(e=>e.current&&e.dependency===dependency))continue;
+      const dependencyInput={document_id:job.doc.id,document:job.doc.file_hash,version:job.doc.extraction_version,blocks:job.blocks.map(b=>({id:b.id,text:b.text,context:contextBlocks(job.doc,b)})),prompts:run.prompt_hashes,model:run.settings.modelByRole.extraction||run.settings.model,effort:run.settings.effortByRole.extraction,clarifications:run.clarifications};
+      const dependency=hash(dependencyInput);
+      const previousEffortDependency=dependencyInput.effort==='medium'?hash({...dependencyInput,effort:'high'}):null;
+      if(run.extractions.some(e=>e.current&&(e.dependency===dependency||e.dependency===previousEffortDependency)))continue;
       const data={task_type:'function_extraction',versions:{document:job.doc.extraction_version},ranges:job.ranges,document:this.catalogue(run).find(d=>d.id===job.doc.id),context:this.context(run,job.ranges)};
-      const result=await this.role(run,'extraction',data,epoch,signal);validate('extraction',result);validateRefs(run,result);
-      const assigned=new Set(job.blocks.map(b=>refKey(blockRef(b))));
-      for(const record of [...result.functions,...result.org_units]) {
-        check(record.source_refs.length>0&&record.source_refs.some(r=>assigned.has(refKey(r))),'Запись извлечения не связана с назначенными блоками.');
-        for(const value of Object.values(record))if(value&&typeof value==='object'&&!Array.isArray(value)&&'basis'in value){check(value.basis==='unknown'?value.value===null:value.source_refs.length>0,'Признак без основания.');}
+      pending.push({job,dependency,data});
+    }
+    for(let offset=0;offset<pending.length;offset+=this.config.extractionConcurrency) {
+      const batch=pending.slice(offset,offset+this.config.extractionConcurrency);
+      const settled=await Promise.allSettled(batch.map(({data})=>this.role(run,'extraction',data,epoch,signal)));
+      const failed=settled.find(result=>result.status==='rejected');
+      if(failed)throw failed.reason;
+      for(const [index,{job,dependency}] of batch.entries()) {
+        const result=settled[index].value;validate('extraction',result);validateRefs(run,result);
+        const assigned=new Set(job.blocks.map(b=>refKey(blockRef(b))));
+        for(const record of [...result.functions,...result.org_units]) {
+          check(record.source_refs.length>0&&record.source_refs.some(r=>assigned.has(refKey(r))),'Запись извлечения не связана с назначенными блоками.');
+          for(const value of Object.values(record))if(value&&typeof value==='object'&&!Array.isArray(value)&&'basis'in value){check(value.basis==='unknown'?value.value===null:value.source_refs.length>0,'Признак без основания.');}
+        }
+        for(const c of result.coverage)for(const b of rangeBlocks(run,c.range))check(assigned.has(refKey(blockRef(b))),'Покрытие извлечения вне задачи.');
+        const extractionId=id('extraction');
+        for(const [field,prefix] of [['functions','fn'],['org_units','org']]) for(const record of result[field]) {
+          const recordId=`${prefix}_${hash({document:job.doc.id,content:{...record,id:undefined,version:undefined}}).slice(0,24)}`;
+          if(!run[field].some(f=>f.id===recordId&&f.current))run[field].push({...record,id:recordId,version:1,side:job.doc.side,current:true,extraction_id:extractionId});
+        }
+        run.extractions.push({id:extractionId,dependency,ranges:job.ranges,current:true,coverage:result.coverage,limitations:result.limitations});staleReport(run);await this.store.save(run);
       }
-      for(const c of result.coverage)for(const b of rangeBlocks(run,c.range))check(assigned.has(refKey(blockRef(b))),'Покрытие извлечения вне задачи.');
-      const extractionId=id('extraction');
-      for(const [field,prefix] of [['functions','fn'],['org_units','org']]) for(const record of result[field]) {
-        const recordId=`${prefix}_${hash({document:job.doc.id,content:{...record,id:undefined,version:undefined}}).slice(0,24)}`;
-        if(!run[field].some(f=>f.id===recordId&&f.current))run[field].push({...record,id:recordId,version:1,side:job.doc.side,current:true,extraction_id:extractionId});
-      }
-      run.extractions.push({id:extractionId,dependency,ranges:job.ranges,current:true,coverage:result.coverage,limitations:result.limitations});staleReport(run);await this.store.save(run);
     }
   }
   async ensureTaskFunctions(run,task,epoch,signal) {

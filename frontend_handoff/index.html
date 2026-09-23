@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Hectra — Живой диалог с ИИ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --font: 'Figtree', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --bg:#000;
+      --surface:#0a0a0a;
+      --surface2:#111;
+      --border:#1e1e1e;
+      --border2:#2a2a2a;
+      --text:#e5e5e5;
+      --muted:#707070;
+      --dim:#3a3a3a;
+      --accent:#fff;
+      --blue:#3b82f6;
+    }
+    * { box-sizing: border-box; }
+    html { font-family: var(--font); }
+    body { background: var(--bg); color: var(--accent); -webkit-font-smoothing: antialiased; }
+    ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background:#222; border-radius:3px; }
+
+    /* ── Nav ── */
+    .nav-link { transition: color 0.15s; }
+    .nav-link:hover { color: #fff; }
+    .btn-primary {
+      background: var(--accent); color: #000;
+      transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover { background: #e0e0e0; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,255,255,0.12); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-outline {
+      background: transparent; color: var(--accent); border: 1px solid #333;
+      transition: all 0.15s;
+    }
+    .btn-outline:hover { border-color: #666; background: rgba(255,255,255,0.04); transform: translateY(-1px); }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-actions .btn-primary,
+    .hero-actions .btn-outline,
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+
+    /* ── Hero grid bg ── */
+    .grid-bg {
+      background-image: linear-gradient(to right, #111 1px, transparent 1px),
+                        linear-gradient(to bottom, #111 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+
+    /* ── Rotating diamond shapes ── */
+    @keyframes rotateSlow  { from{transform:translate(-50%,-50%) rotate(0deg)}   to{transform:translate(-50%,-50%) rotate(360deg)} }
+    @keyframes rotateMed   { from{transform:translate(-50%,-50%) rotate(0deg)}   to{transform:translate(-50%,-50%) rotate(-360deg)} }
+    .shape { position:absolute; top:50%; left:50%; border:1px solid; border-radius:2px; }
+    .shape-1 { width:640px;height:640px; border-color:#111; animation:rotateSlow 60s linear infinite; }
+    .shape-2 { width:460px;height:460px; border-color:#1a1a1a; animation:rotateMed 40s linear infinite; }
+    .shape-3 { width:280px;height:280px; border-color:#222; animation:rotateSlow 25s linear infinite; }
+
+    /* ── Problem / Solution cards ── */
+    .problem-card {
+      background:#080808; border:1px solid #1a1a1a; border-radius:10px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .problem-card:hover { border-color:#333; transform: translateY(-2px); }
+
+    /* ── Animated Chat Demo ── */
+    #demo-window {
+      background:var(--surface); border:1px solid #222; border-radius:14px;
+      overflow:hidden; height:min(420px, 68vh); min-height:340px; display:flex; flex-direction:column;
+      box-shadow: 0 0 60px rgba(0,0,0,0.6);
+    }
+    .demo-topbar {
+      height:44px; background:#111; border-bottom:1px solid #1e1e1e;
+      display:flex; align-items:center; justify-content:space-between; padding:0 16px;
+    }
+    .demo-dots { display:flex; gap:6px; }
+    .demo-dot  { width:10px; height:10px; border-radius:50%; }
+
+    .demo-chat { flex:1; overflow:hidden; padding:16px; display:flex; flex-direction:column; gap:12px; }
+
+    .demo-user-msg {
+      align-self:flex-end;
+      background:#1c1c1c; border:1px solid var(--border2);
+      border-radius:14px 14px 3px 14px;
+      padding:10px 14px; font-size:13px; color:#e5e5e5;
+      max-width:70%; opacity:0; transform:translateY(8px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .demo-user-msg.visible { opacity:1; transform:translateY(0); }
+
+    .demo-ai-block {
+      display:flex; flex-direction:column; gap:8px; opacity:0;
+      transition: opacity 0.4s ease 0.3s;
+    }
+    .demo-ai-block.visible { opacity:1; }
+
+    .demo-ai-label { font-size:11px; font-weight:700; letter-spacing:0.1em; color:#555; font-family:var(--mono); }
+    .demo-section {
+      background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:12px 14px;
+      transition: border-color 0.4s, box-shadow 0.4s, background 0.4s;
+    }
+    .demo-section-title { font-size:13px; font-weight:700; color:#e5e5e5; margin-bottom:6px; }
+    .demo-section-body  { font-size:12px; color:#666; line-height:1.5; overflow:hidden; max-height:36px; transition: max-height 0.7s cubic-bezier(0.16,1,0.3,1); }
+    .demo-section-body.expanded { max-height:120px; }
+    .demo-section.flash { border-color:#3b82f6; box-shadow: 0 0 0 1px rgba(59,130,246,0.2); background:#0d1929; }
+    .demo-section.flash .demo-section-title { color:#93c5fd; }
+
+    .demo-changelog {
+      margin-top:4px; background:#0a0f1a; border:1px solid #1e2a3a; border-left:2px solid #3b82f6;
+      border-radius:8px; padding:8px 12px; opacity:0;
+      transition: opacity 0.4s ease;
+      display:flex; align-items:center; gap:8px;
+    }
+    .demo-changelog.visible { opacity:1; }
+    .demo-changelog-text { font-size:11px; color:#64748b; font-family:var(--mono); }
+
+    .demo-input-bar {
+      height:48px; background:#111; border-top:1px solid #1e1e1e;
+      display:flex; align-items:center; padding:0 12px; gap:8px;
+    }
+    .demo-input-fake {
+      flex:1; height:28px; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:8px;
+      font-size:12px; color:#555; font-family:var(--mono);
+      display:flex; align-items:center; padding:0 10px; position:relative; overflow:hidden;
+    }
+    .demo-cursor { display:inline-block; width:2px; height:13px; background:#888; animation:cursorBlink 1s step-end infinite; vertical-align:middle; margin-left:1px; }
+    @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .demo-send-btn {
+      width:30px; height:30px; background:#fff; color:#000; border-radius:6px;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+
+    /* Typing text animation */
+    .typing-text { display:inline; }
+
+    /* ── Benefits ── */
+    .benefit-num {
+      font-family:var(--mono); font-size:11px; font-weight:700; color:#333;
+      background:#0a0a0a; border:1px solid #1a1a1a; border-radius:6px;
+      width:36px; height:36px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+      transition: all 0.2s;
+    }
+    .benefit-item:hover .benefit-num { border-color:#444; color:#888; }
+    .benefit-item { transition: transform 0.2s; }
+    .benefit-item:hover { transform: translateX(4px); }
+
+    /* Scroll reveal */
+    .reveal { opacity:0; transform:translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+
+    @keyframes fadeIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    .hero-animate { animation: fadeIn 0.8s cubic-bezier(0.16,1,0.3,1) both; }
+    .hero-animate-2 { animation: fadeIn 0.8s cubic-bezier(0.16,1,0.3,1) 0.15s both; }
+    .hero-animate-3 { animation: fadeIn 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s both; }
+    .hero-animate-4 { animation: fadeIn 0.8s cubic-bezier(0.16,1,0.3,1) 0.45s both; }
+
+    @media (max-width: 900px) {
+      .shape-1 { width:520px;height:520px; }
+      .shape-2 { width:360px;height:360px; }
+      .shape-3 { width:220px;height:220px; }
+      #demo-window { height:380px; }
+    }
+
+    @media (max-width: 640px) {
+      .shape-1 { width:360px;height:360px; }
+      .shape-2 { width:260px;height:260px; }
+      .shape-3 { width:160px;height:160px; }
+      #demo-window { height:350px; min-height:320px; border-radius:10px; }
+      .demo-chat { padding:12px; gap:9px; }
+      .demo-user-msg { max-width:88%; font-size:12px; }
+      .demo-section { padding:10px 12px; }
+      .demo-section-body.expanded { max-height:150px; }
+      .demo-input-bar { height:44px; }
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .hero-actions .btn-primary,
+      .hero-actions .btn-outline,
+      .cta-btn {
+        width: 100%;
+        max-width: 100%;
+        text-align: center;
+        white-space: normal;
+      }
+
+      .mobile-hide-demo {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header .btn-primary {
+        min-height: 36px;
+        padding: 8px 12px;
+        font-size: 12px;
+        border-radius: 8px;
+      }
+
+      header .max-w-6xl {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .hero-animate {
+        max-width: 100%;
+        white-space: normal;
+        line-height: 1.35;
+        border-radius: 8px;
+      }
+
+      #solution .rounded-2xl {
+        border-radius: 10px;
+      }
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden">
+
+<!-- ── Header ───────────────────────────────────────────── -->
+<header class="fixed w-full top-0 z-50 bg-black/80 backdrop-blur-md border-b border-zinc-900">
+  <div class="max-w-6xl mx-auto px-6 flex justify-between items-center h-16">
+    <div class="flex items-center gap-3">
+      <img src="logo.png" alt="" class="w-7 h-7 object-contain" />
+      <span style="font-family:var(--font)" class="font-extrabold text-lg tracking-widest">HECTRA</span>
+    </div>
+    <nav class="hidden md:flex gap-8 text-sm font-medium text-zinc-500">
+      <a href="#problems" class="nav-link">Проблема</a>
+      <a href="#solution" class="nav-link">Решение</a>
+      <a href="#benefits" class="nav-link">Преимущества</a>
+    </nav>
+    <a href="workspace.html" class="btn-primary px-5 py-2 rounded-lg text-sm font-bold tracking-wide">
+      Workspace →
+    </a>
+  </div>
+</header>
+
+<!-- ── Hero ─────────────────────────────────────────────── -->
+<section class="relative min-h-screen grid-bg flex items-center pt-20 border-b border-zinc-900 overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center opacity-30">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+  <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black pointer-events-none"></div>
+
+  <div class="relative z-10 max-w-6xl mx-auto px-6 py-20 w-full">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+      <!-- Left: copy -->
+      <div>
+        <div class="hero-animate inline-flex items-center gap-2 border border-zinc-800 bg-black/50 backdrop-blur text-xs font-bold tracking-widest px-4 py-1.5 rounded-full mb-8 text-zinc-400">
+          <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+          ПЕРЕОСМЫСЛЕНИЕ UX ДЛЯ LLM
+        </div>
+        <h1 style="font-family:var(--font)" class="hero-animate-2 text-5xl lg:text-6xl font-black tracking-tight leading-[1.05] mb-6">
+          Не поток<br>сообщений,<br>
+          <span class="text-zinc-400">а живой документ.</span>
+        </h1>
+        <p class="hero-animate-3 text-zinc-400 text-lg leading-relaxed mb-10 max-w-lg">
+          Hectra редактирует ответы модели на месте — контекст остаётся чистым, инференс дешевле, сессии работают стабильнее.
+        </p>
+        <div class="hero-animate-4 hero-actions">
+          <a href="workspace.html" class="btn-primary px-7 py-3.5 rounded-xl text-sm font-bold tracking-wide">
+            Открыть Workspace
+          </a>
+          <a href="#problems" class="btn-outline px-7 py-3.5 rounded-xl text-sm font-bold tracking-wide">
+            Узнать больше
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: animated demo window -->
+      <div class="hero-animate-3 relative">
+        <div id="demo-window">
+          <!-- Topbar -->
+          <div class="demo-topbar">
+            <div class="demo-dots">
+              <div class="demo-dot" style="background:#ff5f57"></div>
+              <div class="demo-dot" style="background:#febc2e"></div>
+              <div class="demo-dot" style="background:#28c840"></div>
+            </div>
+            <span style="font-family:var(--mono);font-size:11px;color:#444">Hectra Chat</span>
+            <div style="width:48px"></div>
+          </div>
+          <!-- Chat -->
+          <div class="demo-chat" id="demo-chat">
+            <!-- Populated by JS -->
+          </div>
+          <!-- Input bar -->
+          <div class="demo-input-bar">
+            <div class="demo-input-fake" id="demo-input-fake">
+              <span id="demo-input-text" class="typing-text"></span>
+              <span class="demo-cursor" id="demo-cursor"></span>
+            </div>
+            <div class="demo-send-btn">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Glow under demo -->
+        <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 w-3/4 h-12 bg-blue-500/10 blur-2xl rounded-full pointer-events-none"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Problems ──────────────────────────────────────────── -->
+<section id="problems" class="py-24 bg-zinc-950 border-b border-zinc-900">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="reveal mb-16">
+      <div class="text-xs font-bold tracking-widest text-zinc-600 mb-3">ПРОБЛЕМА</div>
+      <h2 style="font-family:var(--font)" class="text-3xl md:text-4xl font-black tracking-tight">Что не так с обычным чатом?</h2>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="problem-card p-6 reveal">
+        <div style="font-family:var(--mono)" class="text-xs font-bold text-zinc-700 mb-4">01</div>
+        <h3 class="font-bold text-base mb-3">Раздутый контекст</h3>
+        <p class="text-sm text-zinc-500 leading-relaxed">Несколько сообщений ради одного итогового ответа. Чат быстро теряет мобильность.</p>
+      </div>
+      <div class="problem-card p-6 reveal" style="transition-delay:0.1s">
+        <div style="font-family:var(--mono)" class="text-xs font-bold text-zinc-700 mb-4">02</div>
+        <h3 class="font-bold text-base mb-3">Рост цены инференса</h3>
+        <p class="text-sm text-zinc-500 leading-relaxed">Больше контекста = больше вычислений. Каждая итерация редактирования дорожает.</p>
+      </div>
+      <div class="problem-card p-6 reveal" style="transition-delay:0.2s">
+        <div style="font-family:var(--mono)" class="text-xs font-bold text-zinc-700 mb-4">03</div>
+        <h3 class="font-bold text-base mb-3">Потеря структуры</h3>
+        <p class="text-sm text-zinc-500 leading-relaxed">Итоговое знание размазано по десяткам сообщений. Нет единого живого документа.</p>
+      </div>
+      <div class="problem-card p-6 reveal" style="transition-delay:0.3s">
+        <div style="font-family:var(--mono)" class="text-xs font-bold text-zinc-700 mb-4">04</div>
+        <h3 class="font-bold text-base mb-3">Лимит токенов</h3>
+        <p class="text-sm text-zinc-500 leading-relaxed">Контекст ограничен. Дублирование ответов ускоряет его исчерпание.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Solution ──────────────────────────────────────────── -->
+<section id="solution" class="py-24 border-b border-zinc-900">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="reveal text-center">
+      <div class="text-xs font-bold tracking-widest text-zinc-600 mb-3">РЕШЕНИЕ</div>
+      <h2 style="font-family:var(--font)" class="text-3xl md:text-4xl font-black tracking-tight mb-4">In-Place редактирование</h2>
+      <p class="text-zinc-500 max-w-xl mx-auto text-sm leading-relaxed">Вместо дублирования ответов модель обновляет их на месте. Посмотрите, как меняется сценарий взаимодействия.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Benefits ──────────────────────────────────────────── -->
+<section id="benefits" class="py-24 bg-zinc-950 border-b border-zinc-900">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="reveal mb-16">
+      <div class="text-xs font-bold tracking-widest text-zinc-600 mb-3">ПРЕИМУЩЕСТВА</div>
+      <h2 style="font-family:var(--font)" class="text-3xl md:text-4xl font-black tracking-tight">Влияние на взаимодействие</h2>
+    </div>
+    <div class="grid md:grid-cols-2 gap-x-16 gap-y-10">
+      <div class="benefit-item flex gap-5 items-start reveal">
+        <div class="benefit-num">01</div>
+        <div>
+          <h4 class="font-bold text-lg mb-2">Чистота и компактность</h4>
+          <p class="text-zinc-500 text-sm leading-relaxed">История взаимодействия компактна и не теряет информативности. История изменений доступна через интерфейс, но не захламляет ленту чата.</p>
+        </div>
+      </div>
+      <div class="benefit-item flex gap-5 items-start reveal" style="transition-delay:0.1s">
+        <div class="benefit-num">02</div>
+        <div>
+          <h4 class="font-bold text-lg mb-2">Экономия на инференсе</h4>
+          <p class="text-zinc-500 text-sm leading-relaxed">Компактность чата и отсутствие дублирования больших блоков текста — цена генерации растёт значительно медленнее.</p>
+        </div>
+      </div>
+      <div class="benefit-item flex gap-5 items-start reveal" style="transition-delay:0.15s">
+        <div class="benefit-num">03</div>
+        <div>
+          <h4 class="font-bold text-lg mb-2">Сфокусированность модели</h4>
+          <p class="text-zinc-500 text-sm leading-relaxed">В контексте сохраняются только актуальные ответы. Модель не путается со старыми версиями и остаётся на актуальных частях документа.</p>
+        </div>
+      </div>
+      <div class="benefit-item flex gap-5 items-start reveal" style="transition-delay:0.2s">
+        <div class="benefit-num">04</div>
+        <div>
+          <h4 class="font-bold text-lg mb-2">Виртуальное расширение контекста</h4>
+          <p class="text-zinc-500 text-sm leading-relaxed">Фактический лимит в токенах не меняется, но промежуточные итерации редактирования в контекст не входят — номинально он становится больше.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ───────────────────────────────────────────────── -->
+<section class="py-32">
+  <div class="max-w-2xl mx-auto px-6 text-center reveal">
+    <h2 style="font-family:var(--font)" class="text-4xl md:text-5xl font-black tracking-tight mb-6">
+      Попробуйте прямо сейчас
+    </h2>
+    <p class="text-zinc-500 mb-10 leading-relaxed">Hectra — это не просто UX-улучшение, а переосмысление самой природы диалога с языковой моделью.</p>
+    <a href="workspace.html" class="cta-btn btn-primary inline-block px-10 py-4 rounded-xl text-base font-bold tracking-wide">
+      Открыть Workspace →
+    </a>
+  </div>
+</section>
+
+<!-- ── Footer ────────────────────────────────────────────── -->
+<footer class="bg-black py-10 border-t border-zinc-900">
+  <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="flex items-center gap-3">
+      <img src="logo.png" alt="" class="w-6 h-6 object-contain" />
+      <span style="font-family:var(--font)" class="font-extrabold tracking-widest text-sm">HECTRA</span>
+    </div>
+    <p style="font-family:var(--mono)" class="text-zinc-600 text-xs">© 2025 Hectra Project.</p>
+  </div>
+</footer>
+
+<script>
+// ── Scroll reveal ────────────────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Animated Demo ────────────────────────────────────────
+const demoChat = document.getElementById('demo-chat');
+const demoInputText = document.getElementById('demo-input-text');
+const demoCursor = document.getElementById('demo-cursor');
+
+const DEMO_SECTIONS = [
+  { id: 'intro',   title: 'Что такое тема X?',     body: 'Основные понятия и определения, история возникновения концепции...' },
+  { id: 'details', title: 'Ключевые принципы',      body: 'Подробное рассмотрение основных принципов и механизмов работы...' },
+  { id: 'usage',   title: 'Применение на практике', body: 'Примеры применения в реальных проектах и сценариях использования...' },
+];
+
+let demoBubblesEl, demoAiEl, demoChangelogEl;
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function typeText(text, target, speed = 40) {
+  target.textContent = '';
+  for (const ch of text) {
+    target.textContent += ch;
+    await sleep(speed);
+  }
+}
+
+function buildDemoUI() {
+  demoChat.innerHTML = '';
+
+  // User bubble
+  demoBubblesEl = document.createElement('div');
+  demoBubblesEl.className = 'demo-user-msg';
+  demoChat.appendChild(demoBubblesEl);
+
+  // AI block
+  demoAiEl = document.createElement('div');
+  demoAiEl.className = 'demo-ai-block';
+  demoAiEl.innerHTML = `
+    <div class="demo-ai-label">HECTRA — Живой документ</div>
+    ${DEMO_SECTIONS.map(s => `
+      <div class="demo-section" id="dsec-${s.id}">
+        <div class="demo-section-title">${s.title}</div>
+        <div class="demo-section-body" id="dbody-${s.id}">${s.body}</div>
+      </div>
+    `).join('')}
+  `;
+  demoChat.appendChild(demoAiEl);
+
+  // Changelog
+  demoChangelogEl = document.createElement('div');
+  demoChangelogEl.className = 'demo-changelog';
+  demoChangelogEl.innerHTML = `
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    <span class="demo-changelog-text">Обновлено: расширен раздел «Ключевые принципы»</span>
+  `;
+  demoChat.appendChild(demoChangelogEl);
+}
+
+async function runDemo() {
+  buildDemoUI();
+
+  // Phase 1: type user message
+  await sleep(600);
+  await typeText('Объясни тему X подробно', demoInputText, 45);
+  await sleep(300);
+
+  // Show user bubble
+  demoBubblesEl.textContent = 'Объясни тему X подробно';
+  demoBubblesEl.classList.add('visible');
+  demoInputText.textContent = '';
+  await sleep(400);
+
+  // Show AI block
+  demoAiEl.classList.add('visible');
+  await sleep(2200);
+
+  // Phase 2: type edit request
+  await typeText('Расширь раздел "Ключевые принципы"', demoInputText, 40);
+  await sleep(300);
+  demoInputText.textContent = '';
+  await sleep(200);
+
+  // Flash the details section
+  const detailsSec = document.getElementById('dsec-details');
+  const detailsBody = document.getElementById('dbody-details');
+  detailsSec.classList.add('flash');
+  await sleep(200);
+  detailsBody.classList.add('expanded');
+  detailsBody.innerHTML = `
+    Подробное рассмотрение основных принципов:<br>
+    <strong style="color:#93c5fd">1. Принцип X</strong> — детальное объяснение механизма работы и взаимодействия с системой.<br>
+    <strong style="color:#93c5fd">2. Принцип Y</strong> — ключевые характеристики и практические следствия применения.
+  `;
+  await sleep(800);
+
+  // Show changelog
+  demoChangelogEl.classList.add('visible');
+  await sleep(2800);
+
+  // Remove flash
+  detailsSec.classList.remove('flash');
+  await sleep(600);
+
+  // Fade out and restart
+  demoChat.style.opacity = '0';
+  demoChat.style.transition = 'opacity 0.5s';
+  await sleep(500);
+  demoChat.style.opacity = '1';
+
+  runDemo(); // loop
+}
+
+// Start demo after page loads
+window.addEventListener('load', () => setTimeout(runDemo, 800));
+</script>
+</body>
+</html>

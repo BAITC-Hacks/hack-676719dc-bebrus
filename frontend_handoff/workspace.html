@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net 'unsafe-inline'; font-src https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data:; connect-src 'self' https://api.x.ai; worker-src 'self' blob: https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests" />
+  <title>Hectra Workspace</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <link rel="stylesheet" href="css/workspace.css" />
+  <link rel="stylesheet" href="css/workspace-branches.css" />
+</head>
+<body>
+
+<div class="shell">
+  <div class="sidebar-backdrop" id="sidebar-backdrop" hidden></div>
+
+  <!-- ════════════════════════════════
+       SIDEBAR
+  ════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar" aria-label="Chat navigation">
+
+    <!-- Header — same height as main topbar -->
+    <div class="sidebar-header">
+      <div class="brand">
+        <img src="logo.png" class="brand-logo" alt="Hectra" />
+        <span class="brand-name">HECTRA</span>
+      </div>
+      <button id="new-chat-btn" class="new-btn" title="New chat">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New
+      </button>
+    </div>
+
+    <div class="sidebar-body">
+
+      <!-- Workspaces (each workspace can hold branches) -->
+      <div>
+        <div class="sidebar-label">Workspaces</div>
+        <div id="chat-history-list">
+          <span class="sidebar-empty">No workspaces yet</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar footer: account + settings -->
+    <div class="sidebar-footer">
+      <div class="sidebar-account">
+        <div class="account-avatar">D</div>
+        <div class="account-info">
+          <span class="account-name">Daniel G.</span>
+          <span class="account-plan">Free plan</span>
+        </div>
+      </div>
+      <button class="settings-btn" id="settings-btn" title="Settings">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- ════════════════════════════════
+       MAIN AREA
+  ════════════════════════════════ -->
+  <main class="main">
+
+    <!-- Topbar — same height as sidebar header -->
+    <header class="topbar">
+      <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" type="button" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <line x1="4" y1="7" x2="20" y2="7"></line>
+          <line x1="4" y1="12" x2="20" y2="12"></line>
+          <line x1="4" y1="17" x2="20" y2="17"></line>
+        </svg>
+      </button>
+      <!-- Where am I: workspace / branch -->
+      <div class="crumb">
+        <span class="crumb-workspace" id="crumb-workspace">New workspace</span>
+        <span class="crumb-sep" aria-hidden="true">/</span>
+        <button class="branch-chip" id="branch-chip" type="button"
+                aria-haspopup="menu" aria-expanded="false" aria-controls="branch-menu"
+                title="Switch branch" aria-label="Current branch: main. Switch branch">
+          <span class="branch-dot" aria-hidden="true"></span>
+          <span class="branch-chip-name" id="branch-chip-name">main</span>
+          <svg class="branch-chip-caret" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <span class="crumb-note" id="crumb-note" hidden></span>
+      </div>
+
+      <div class="topbar-actions">
+        <!-- Only present while something is actually happening -->
+        <div class="status-badge" id="status-badge" hidden>
+          <span class="status-dot-el" id="status-dot"></span>
+          <span id="status-text"></span>
+        </div>
+        <button class="topbar-btn" id="view-toggle-btn" type="button" title="Workspace map" aria-label="Show workspace map" aria-pressed="false">Map</button>
+        <button class="topbar-btn topbar-btn-merge" id="merge-btn" type="button" title="Merge this branch" aria-label="Merge this branch into its parent" hidden>Merge</button>
+      </div>
+    </header>
+
+    <!-- Branch switcher (anchored to the branch chip) -->
+    <div class="menu-pop" id="branch-menu" role="menu" aria-label="Branches" hidden></div>
+
+    <!-- Contextual menus: section / document / branch row -->
+    <div class="menu-pop" id="context-menu" role="menu" hidden></div>
+
+    <!-- Historical state preview banner (internal history tool only) -->
+    <div class="history-banner" id="history-banner" hidden></div>
+
+    <!-- Chat scroll -->
+    <div class="chat-scroll" id="chat-scroll">
+      <div class="chat-container" id="chat-container">
+        <!-- Populated by app.js on load -->
+      </div>
+    </div>
+
+    <!-- Workspace map — replaces the document view only -->
+    <div class="map-view" id="map-view" hidden>
+      <div class="map-stage" id="map-stage"></div>
+      <aside class="temporary-chat-drawer" id="temporary-chat-drawer" aria-label="Temporary branch chat" hidden></aside>
+    </div>
+
+    <!-- Input area -->
+    <div class="input-area">
+      <div class="input-wrap">
+
+        <!-- Where the next instruction goes: branch / section edit / exploration -->
+        <div class="composer-context" id="composer-context" hidden></div>
+
+        <!-- Global version bar (above the input field) -->
+        <div id="global-version-bar" class="version-bar-fixed"></div>
+
+        <div class="input-box" id="input-box">
+          <!-- Attachment previews -->
+          <div id="attach-preview" class="attach-preview" style="display:none"></div>
+
+          <div class="input-row">
+            <button id="attach-btn" class="attach-btn" title="Attach file">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+              </svg>
+            </button>
+            <input type="file" id="file-input" multiple
+              accept="image/*,.txt,.md,.pdf,.docx,.js,.ts,.py,.json,.csv,.yaml,.yml,.xml,.html,.css,.go,.rs,.java,.cpp,.cs"
+              style="display:none" />
+            <textarea
+              id="user-input"
+              rows="1"
+              placeholder="Tell Hectra what to write or change…"
+            ></textarea>
+            <div class="input-actions">
+              <button id="cancel-edit-btn" title="Cancel current change">
+                Cancel
+              </button>
+              <button id="send-btn" title="Send">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- History — internal inspection panel, no entry point in the interface
+       (see js/historyUI.js) -->
+  <aside class="history-panel" id="history-panel" aria-label="History" hidden></aside>
+</div>
+
+<!-- Selection toolbar — appears next to a text selection inside the document -->
+<div class="sel-toolbar" id="selection-toolbar" role="toolbar" aria-label="Selection actions" hidden></div>
+
+<!-- Merge -->
+<div class="merge-modal" id="merge-modal" hidden></div>
+
+<!-- Staged model edit review / local structural draft -->
+<div class="edit-review-modal" id="edit-review-modal" hidden></div>
+
+<!-- One-step confirmation (branch deletion) -->
+<div class="confirm-modal" id="confirm-modal" hidden></div>
+
+<div class="settings-modal" id="settings-modal" hidden>
+  <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="settings-head">
+      <div>
+        <h2 id="settings-title">Settings</h2>
+        <p>Basic interface and API debugging options.</p>
+      </div>
+      <button class="settings-close" id="settings-close-btn" type="button" title="Close">×</button>
+    </div>
+
+    <div class="settings-body">
+      <label class="settings-row">
+        <span>
+          <strong>Theme</strong>
+          <small>Switches the interface palette.</small>
+        </span>
+        <div class="segmented-control" data-setting="theme">
+          <button type="button" data-value="dark">Dark</button>
+          <button type="button" data-value="light">Light</button>
+        </div>
+      </label>
+
+      <label class="settings-row">
+        <span>
+          <strong>API mode</strong>
+          <small>Proxy bypasses CORS and uses the key from .env on the server.</small>
+        </span>
+        <div class="segmented-control" data-setting="api-mode">
+          <button type="button" data-value="proxy">Proxy</button>
+          <button type="button" data-value="direct">Direct</button>
+        </div>
+      </label>
+    </div>
+
+    <div class="settings-actions">
+      <button id="save-settings-btn" class="settings-primary" type="button">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modular JS — load in dependency order -->
+<script src="js/config.js"></script>
+<script src="js/security.js"></script>
+<script src="js/actionLog.js"></script>
+<script src="js/mergeEngine.js"></script>
+<script src="js/editEngine.js"></script>
+<script src="js/structureAssistant.js"></script>
+<script src="js/state.js"></script>
+<script src="js/mdParser.js"></script>
+<script src="js/temporaryChat.js"></script>
+<script src="js/marked-fallback.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/editReviewUI.js"></script>
+<script src="js/uiKit.js"></script>
+<script src="js/branchUI.js"></script>
+<script src="js/selectionUI.js"></script>
+<script src="js/historyUI.js"></script>
+<script src="js/mapUI.js"></script>
+<script src="js/mergeUI.js"></script>
+<script src="js/workspaceHeader.js"></script>
+<script src="js/app.js"></script>
+<script src="js/film-demo.js"></script>
+
+</body>
+</html>
